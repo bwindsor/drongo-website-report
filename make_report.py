@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+import getpass
 from itertools import zip_longest
 from upload_to_website import upload_to_website
 from process_photos import process_photos
@@ -10,7 +11,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
     upload_photo_dir = f"/WebImages/{year}/{upload_dir_name}"
     lightbox_name = upload_dir_name
 
-    with open(input_report_file, 'r') as f:
+    with open(input_report_file, 'r', encoding='utf8') as f:
         report_text = f.read()
 
     report_paragraphs = [f"<p>{p.strip()}</p>" for p in report_text.split('\n')]
@@ -51,10 +52,10 @@ def show_help():
     help_text = r"""
     
     USAGE
-    python make_report.py <input_report_filename> <input_photo_dir> <year> <upload_dir_name> <report_title> <username> <password>
+    python make_report.py <input_report_filename> <input_photo_dir> <year> <upload_dir_name> <report_title> <username>
     
     EXAMPLE
-    python make_report.py my_report.txt "C:\Users\Ben Windsor\Pictures\DrongO Event" 2021 20210512DrongOEvent "About a DrongO event" drongousername drongopassword
+    python make_report.py my_report.txt "C:\Users\Ben Windsor\Pictures\DrongO Event" 2021 20210512DrongOEvent "About a DrongO event" drongousername
     
     """
 
@@ -66,7 +67,7 @@ if __name__ == '__main__':
         show_help()
         sys.exit(0)
 
-    if len(sys.argv) != 8:
+    if len(sys.argv) != 7:
         show_help()
         sys.exit(1)
 
@@ -79,6 +80,7 @@ if __name__ == '__main__':
     _report_title = sys.argv[5]
 
     _username = sys.argv[6]
-    _password = sys.argv[7]
+
+    _password = getpass.getpass()
 
     make_report(_input_report_file, _input_photo_dir, _year, _upload_dir_name, _report_title, _username, _password)
