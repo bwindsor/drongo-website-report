@@ -38,7 +38,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
 
     report_paragraph_contents: List[str] = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
-    photo_names = [f for f in os.listdir(input_photo_dir) if "Small" not in f]
+    photo_names = [f for f in sorted(os.listdir(input_photo_dir)) if "Small" not in f]
 
     all_photo_html = []
     for i, photo_name in enumerate(photo_names):
