@@ -2,19 +2,41 @@ import os
 import sys
 import tempfile
 import getpass
+from typing import List, Optional
 from itertools import zip_longest
 from upload_to_website import upload_to_website
 from process_photos import process_photos
+from drongo_types import Section
 
 
-def generate_report_text(input_report_file: str, input_photo_dir: str, year: int, upload_dir_name: str):
+class Builder:
+    def __init__(self):
+        self._sections = []
+        self._current_section = None
+
+    def new_section(self, title: Optional[str]):
+        if self._current_section is not None:
+            self._sections.append(self._current_section)
+        self._current_section = Section(title, "")
+
+    def append_line(self, line: str):
+        if self._current_section is None:
+            self._current_section = Section(title=None, content="")
+        self._current_section.content = self._current_section.content + line + "\n"
+
+    def build(self) -> List[Section]:
+        self._sections.append(self._current_section)
+        return self._sections
+
+
+def generate_report_text(input_report_file: str, input_photo_dir: str, year: int, upload_dir_name: str) -> List[Section]:
     upload_photo_dir = f"/WebImages/{year}/{upload_dir_name}"
     lightbox_name = upload_dir_name
 
     with open(input_report_file, 'r', encoding='utf8') as f:
         report_text = f.read()
 
-    report_paragraph_contents = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
+    report_paragraph_contents: List[str] = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
     photo_names = [f for f in os.listdir(input_photo_dir) if "Small" not in f]
 
@@ -27,17 +49,28 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
         photo_html = f"""<a href="{upload_photo_dir}/{photo_name}" data-lightbox="{lightbox_name}"><img src="{upload_photo_dir}/{small_name}" class="Float{'Right' if is_even else 'Left'}Image"></a>"""
         all_photo_html.append(photo_html)
 
-    output_parts = []
-    for paragraph, photo in zip_longest(report_paragraph_contents, all_photo_html, fillvalue=None):
-        if photo is not None and paragraph is not None:
-            output_parts.append(f"<p>{photo}{paragraph}</p>")
-        elif photo is not None:
-            output_parts.append(photo)
-        elif paragraph is not None:
-            output_parts.append(f"<p>{paragraph}</p>")
+    builder = Builder()
 
-    output_string = "\n".join(output_parts)
-    return output_string
+    photo_idx = -1
+    for paragraph in report_paragraph_contents:
+        if paragraph.startswith('# '):
+            builder.new_section(paragraph[1:].strip())
+            continue
+
+        photo_idx += 1
+        if photo_idx < len(all_photo_html):
+            photo = all_photo_html[photo_idx]
+        else:
+            photo = None
+
+        if photo is not None and paragraph is not None:
+            builder.append_line(f"<p>{photo}{paragraph}</p>")
+        elif photo is not None:
+            builder.append_line(photo)
+        elif paragraph is not None:
+            builder.append_line(f"<p>{paragraph}</p>")
+
+    return builder.build()
 
 
 def make_report(input_report_file: str, input_photo_dir: str, year: int, upload_dir_name: str, report_title: str,

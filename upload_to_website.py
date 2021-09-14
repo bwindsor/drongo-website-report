@@ -1,4 +1,6 @@
 import os
+from typing import List
+from drongo_types import Section
 from contextlib import closing
 from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
@@ -65,7 +67,7 @@ def upload_photos(driver: webdriver.Chrome, year: int, processed_photo_dir: str,
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.LINK_TEXT, photo_filename)))
 
 
-def upload_report(driver: webdriver.Chrome, report_title: str, report_content: str):
+def upload_report(driver: webdriver.Chrome, report_title: str, report_content: List[Section]):
     driver.get("https://new.drongo.org.uk/Admin/EditNews.aspx")
 
     elements = driver.find_elements_by_xpath(f"//*[contains(text(), '{report_title}')]")
@@ -82,16 +84,40 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: s
     title_input.clear()
     title_input.send_keys(report_title)
 
-    content_input = driver.find_element_by_id("MainPlaceHolder_SectionsView_ContentText_0")
-    content_input.clear()
-    content_input.send_keys(report_content)
+    i = 0
+    while True:
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "MainPlaceHolder_SectionsView_DeleteSectionButton_0")))
+        try:
+            delete_section_button = driver.find_element_by_id("MainPlaceHolder_SectionsView_DeleteSectionButton_1")
+            delete_section_button.click()
+        except Exception:
+            # When delete section 1 button no longer found, stop deleting sections
+            break
+        i += 1
+
+    for i, section in enumerate(report_content):
+        print(f"Section {i}")
+        if i > 0:
+            add_section_button = driver.find_element_by_id("MainPlaceHolder_AddSectionButton")
+            add_section_button.click()
+
+        section_title_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, f"MainPlaceHolder_SectionsView_SubtitleText_{i}")))
+        if section.title is not None:
+            section_title_input.clear()
+            section_title_input.send_keys(section.title)
+        else:
+            section_title_input.clear()
+
+        content_input = driver.find_element_by_id(f"MainPlaceHolder_SectionsView_ContentText_{i}")
+        content_input.clear()
+        content_input.send_keys(section.content)
 
     save_button = driver.find_element_by_id("MainPlaceHolder_SaveButton")
     save_button.click()
 
 
 def upload_to_website(year: int, processed_photo_dir: str, photo_upload_dir_name: str,
-                      username: str, password: str, report_title: str, report_content: str):
+                      username: str, password: str, report_title: str, report_content: List[Section]):
     with closing(webdriver.Chrome('./chromedriver.exe')) as driver:
         login(driver, username, password)
 
