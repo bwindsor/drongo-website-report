@@ -14,7 +14,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
     with open(input_report_file, 'r', encoding='utf8') as f:
         report_text = f.read()
 
-    report_paragraphs = [f"<p>{p.strip()}</p>" for p in report_text.split('\n')]
+    report_paragraph_contents = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
     photo_names = [f for f in os.listdir(input_photo_dir) if "Small" not in f]
 
@@ -28,11 +28,13 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
         all_photo_html.append(photo_html)
 
     output_parts = []
-    for paragraph, photo in zip_longest(report_paragraphs, all_photo_html, fillvalue=None):
-        if photo is not None:
+    for paragraph, photo in zip_longest(report_paragraph_contents, all_photo_html, fillvalue=None):
+        if photo is not None and paragraph is not None:
+            output_parts.append(f"<p>{photo}{paragraph}</p>")
+        elif photo is not None:
             output_parts.append(photo)
-        if paragraph is not None:
-            output_parts.append(paragraph)
+        elif paragraph is not None:
+            output_parts.append(f"<p>{paragraph}</p>")
 
     output_string = "\n".join(output_parts)
     return output_string
