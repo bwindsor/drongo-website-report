@@ -90,6 +90,8 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
         try:
             delete_section_button = driver.find_element_by_id("MainPlaceHolder_SectionsView_DeleteSectionButton_1")
             delete_section_button.click()
+            obj = driver.switch_to.alert
+            obj.accept()
         except Exception:
             # When delete section 1 button no longer found, stop deleting sections
             break
