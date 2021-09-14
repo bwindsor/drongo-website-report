@@ -121,7 +121,7 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
 
 def upload_to_website(year: int, processed_photo_dir: str, photo_upload_dir_name: str,
                       username: str, password: str, report_title: str, report_content: List[Section]):
-    chromedriver_name = "chromedriver.exe" if platform.system() == "Windows" else "chromedriver"
+    chromedriver_name = "./chromedriver.exe" if platform.system() == "Windows" else "./chromedriver"
     with closing(webdriver.Chrome(chromedriver_name)) as driver:
         login(driver, username, password)
 
