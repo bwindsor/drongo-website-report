@@ -39,7 +39,7 @@ def login(driver: webdriver.Chrome, username: str, password: str):
 
 def upload_photos(driver: webdriver.Chrome, year: int, processed_photo_dir: str, photo_upload_dir_name: str):
     year_str = str(year)
-    photo_filenames = os.listdir(processed_photo_dir)
+    photo_filenames = sorted(os.listdir(processed_photo_dir))
 
     driver.get("https://new.drongo.org.uk/Admin/ManageFiles.aspx")
 
