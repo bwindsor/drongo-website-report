@@ -1,4 +1,5 @@
 import os
+import platform
 from typing import List
 from drongo_types import Section
 from contextlib import closing
@@ -120,7 +121,8 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
 
 def upload_to_website(year: int, processed_photo_dir: str, photo_upload_dir_name: str,
                       username: str, password: str, report_title: str, report_content: List[Section]):
-    with closing(webdriver.Chrome('./chromedriver.exe')) as driver:
+    chromedriver_name = "chromedriver.exe" if platform.system() == "Windows" else "chromedriver"
+    with closing(webdriver.Chrome(chromedriver_name)) as driver:
         login(driver, username, password)
 
         upload_photos(driver, year, processed_photo_dir, photo_upload_dir_name)
