@@ -59,16 +59,14 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
 
         photo_idx += 1
         if photo_idx < len(all_photo_html):
-            photo = all_photo_html[photo_idx]
+            builder.append_line(f"<p>{all_photo_html[photo_idx]}{paragraph}</p>")
         else:
-            photo = None
-
-        if photo is not None and paragraph is not None:
-            builder.append_line(f"<p>{photo}{paragraph}</p>")
-        elif photo is not None:
-            builder.append_line(photo)
-        elif paragraph is not None:
             builder.append_line(f"<p>{paragraph}</p>")
+
+    # Add any excess photos to the end
+    photo_idx += 1
+    for photo in all_photo_html[photo_idx:]:
+        builder.append_line(photo)
 
     return builder.build()
 
