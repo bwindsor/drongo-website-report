@@ -3,7 +3,9 @@
 1. Download the `chromedriver` executable suitable for your version of Chrome from [https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads)
 1. Put the `chromedriver` executable in this directory
 1. Create a Python virtual environment `virtualenv env`
-1. Activate the virtual environment `venv/Scripts/activate`
+1. Activate the virtual environment 
+   * `venv/Scripts/activate` on Windows
+   * `source ./venv/bin/activate` on Linux
 1. Install dependencies `pip install -r requirements.txt`
 
 ## What the code does
