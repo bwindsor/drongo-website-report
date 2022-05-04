@@ -29,28 +29,30 @@ class Builder:
         self._sections.append(self._current_section)
         return self._sections
 
+
 def get_image_caption(filename: str)  -> str:
     name_without_ext, ext = os.path.splitext(filename)
 
     parts = name_without_ext.split("_")
     regex = "^(day)*[0-9]+\.*[0-9]*$"
-    numFound = False
+    num_found = False
 
-    newParts = []
+    new_parts = []
     for p in parts:
         if re.search(regex, p):
-            numFound = True
+            num_found = True
             continue
 
-        if numFound:
-            newParts.append(p)
+        if num_found:
+            new_parts.append(p)
             continue
 
-    if len(newParts) < 1:
+    if len(new_parts) < 1:
         return ""
 
-    newParts[0] = newParts[0].capitalize()
-    return " ".join(newParts)
+    new_parts[0] = new_parts[0].capitalize()
+    return " ".join(new_parts)
+
 
 def generate_report_text(input_report_file: str, input_photo_dir: str, year: int, upload_dir_name: str) -> List[Section]:
     upload_photo_dir = f"/WebImages/{year}/{upload_dir_name}"
