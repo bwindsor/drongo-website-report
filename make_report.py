@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import tempfile
 import getpass
@@ -29,6 +30,29 @@ class Builder:
         return self._sections
 
 
+def get_image_caption(filename: str) -> str:
+    name_without_ext, ext = os.path.splitext(filename)
+
+    parts = re.split(r"[ _-]",name_without_ext)
+    regex = r"[0-9]+$"
+    text_found = False
+
+    new_parts = []
+    for p in parts:
+
+        if text_found:
+            new_parts.append(p)
+        else:
+            if not re.search(regex, p):
+                new_parts.append(p)
+                text_found = True
+
+    if len(new_parts) < 1:
+        return ""
+
+    new_parts[0] = new_parts[0].capitalize()
+    return " ".join(new_parts)
+
 def generate_report_text(input_report_file: str, input_photo_dir: str, year: int, upload_dir_name: str) -> List[Section]:
     upload_photo_dir = f"/WebImages/{year}/{upload_dir_name}"
     lightbox_name = upload_dir_name
@@ -43,10 +67,11 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
     all_photo_html = []
     for i, photo_name in enumerate(photo_names):
         name_without_ext, ext = os.path.splitext(photo_name)
+        image_caption = get_image_caption(photo_name)
         small_name = name_without_ext + "Small" + ext
         is_even = i % 2 == 0
 
-        photo_html = f"""<a href="{upload_photo_dir}/{photo_name}" data-lightbox="{lightbox_name}"><img src="{upload_photo_dir}/{small_name}" class="Float{'Right' if is_even else 'Left'}Image"></a>"""
+        photo_html = f"""<a href="{upload_photo_dir}/{photo_name}" data-lightbox="{lightbox_name}" data-title="{image_caption}"><img src="{upload_photo_dir}/{small_name}" class="Float{'Right' if is_even else 'Left'}Image"></a>"""
         all_photo_html.append(photo_html)
 
     builder = Builder()
