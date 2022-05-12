@@ -83,7 +83,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
 
     report_paragraph_contents: List[str] = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
-    photo_names = [f for f in sorted(os.listdir(input_photo_dir)) if "Small" not in f]
+    photo_names = [f for f in sorted(os.listdir(input_photo_dir)) if "Small" not in f and not f.endswith(".json")]
     captions = read_image_captions(input_photo_dir)
 
     all_photo_html = []
@@ -98,6 +98,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
         all_photo_html.append(photo_html)
 
     builder = Builder()
+    write_image_captions(input_photo_dir, captions)
 
     photo_idx = -1
     for paragraph in report_paragraph_contents:

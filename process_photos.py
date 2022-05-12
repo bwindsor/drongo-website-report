@@ -4,7 +4,7 @@ from PIL import Image, ImageOps
 
 def process_photos(photo_dir: str, output_dir: str):
 
-    photo_filenames = [f for f in os.listdir(photo_dir) if os.path.isfile(os.path.join(photo_dir, f))]
+    photo_filenames = [f for f in os.listdir(photo_dir) if os.path.isfile(os.path.join(photo_dir, f)) and not f.endswith(".json")]
 
     for filename in photo_filenames:
         with open(os.path.join(photo_dir, filename), 'rb') as f:
