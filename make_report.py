@@ -45,7 +45,7 @@ def read_image_captions(input_photo_dir: str) -> dict[str, str]:
 def write_image_captions(input_photo_dir: str, captions: dict[str, str]):
     path = os.path.join(input_photo_dir, CAPTIONS_FILE)
     with open(path, 'w') as outfile:
-        json.dump(captions, outfile)
+        json.dump(captions, outfile, indent=4)
 
 
 def get_image_caption(captions: dict[str, str], filename: str) -> str:
