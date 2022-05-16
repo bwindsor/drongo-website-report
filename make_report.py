@@ -4,10 +4,12 @@ import os
 import re
 import sys
 import tempfile
-from typing import List, Optional, Dict
+from typing import List, Optional
 from drongo_types import Section
-from process_photos import process_photos
+from process_photos import process_photos, get_large_photo_names
 from upload_to_website import upload_to_website
+
+CAPTIONS_FILE = "captions.json"
 
 
 class Builder:
@@ -30,8 +32,8 @@ class Builder:
         return self._sections
 
 
-def read_image_captions(input_photo_dir: str) -> Dict[str, str]:
-    path = input_photo_dir + "/captions.json"
+def read_image_captions(input_photo_dir: str) -> dict[str, str]:
+    path = os.path.join(input_photo_dir, CAPTIONS_FILE)
     if os.path.exists(path):
         with open(path) as infile:
             captions = json.load(infile)
@@ -40,13 +42,13 @@ def read_image_captions(input_photo_dir: str) -> Dict[str, str]:
         return {}
 
 
-def write_image_captions(input_photo_dir: str, captions: Dict[str, str]):
-    path = input_photo_dir + "/captions.json"
+def write_image_captions(input_photo_dir: str, captions: dict[str, str]):
+    path = os.path.join(input_photo_dir, CAPTIONS_FILE)
     with open(path, 'w') as outfile:
         json.dump(captions, outfile)
 
 
-def get_image_caption(captions: Dict[str, str], filename: str) -> str:
+def get_image_caption(captions: dict[str, str], filename: str) -> str:
 
     if filename in captions:
         return captions[filename]
@@ -83,7 +85,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
 
     report_paragraph_contents: List[str] = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
-    photo_names = [f for f in sorted(os.listdir(input_photo_dir)) if "Small" not in f and not f.endswith(".json")]
+    photo_names = get_large_photo_names(input_photo_dir)
     captions = read_image_captions(input_photo_dir)
 
     all_photo_html = []
