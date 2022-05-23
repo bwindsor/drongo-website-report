@@ -1,13 +1,15 @@
+import getpass
+import json
 import os
 import re
 import sys
 import tempfile
-import getpass
 from typing import List, Optional
-from itertools import zip_longest
-from upload_to_website import upload_to_website
-from process_photos import process_photos
 from drongo_types import Section
+from process_photos import process_photos, get_large_photo_names
+from upload_to_website import upload_to_website
+
+CAPTIONS_FILE = "captions.json"
 
 
 class Builder:
@@ -30,7 +32,27 @@ class Builder:
         return self._sections
 
 
-def get_image_caption(filename: str) -> str:
+def read_image_captions(input_photo_dir: str) -> dict[str, str]:
+    path = os.path.join(input_photo_dir, CAPTIONS_FILE)
+    if os.path.exists(path):
+        with open(path) as infile:
+            captions = json.load(infile)
+        return captions
+    else:
+        return {}
+
+
+def write_image_captions(input_photo_dir: str, captions: dict[str, str]):
+    path = os.path.join(input_photo_dir, CAPTIONS_FILE)
+    with open(path, 'w') as outfile:
+        json.dump(captions, outfile, indent=4)
+
+
+def get_image_caption(captions: dict[str, str], filename: str) -> str:
+
+    if filename in captions:
+        return captions[filename]
+
     name_without_ext, ext = os.path.splitext(filename)
 
     parts = re.split(r"[ _-]",name_without_ext)
@@ -53,6 +75,7 @@ def get_image_caption(filename: str) -> str:
     new_parts[0] = new_parts[0].capitalize()
     return " ".join(new_parts)
 
+
 def generate_report_text(input_report_file: str, input_photo_dir: str, year: int, upload_dir_name: str) -> List[Section]:
     upload_photo_dir = f"/WebImages/{year}/{upload_dir_name}"
     lightbox_name = upload_dir_name
@@ -62,12 +85,14 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
 
     report_paragraph_contents: List[str] = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
-    photo_names = [f for f in sorted(os.listdir(input_photo_dir)) if "Small" not in f]
+    photo_names = get_large_photo_names(input_photo_dir)
+    captions = read_image_captions(input_photo_dir)
 
     all_photo_html = []
     for i, photo_name in enumerate(photo_names):
         name_without_ext, ext = os.path.splitext(photo_name)
-        image_caption = get_image_caption(photo_name)
+        image_caption = get_image_caption(captions, photo_name)
+        captions[photo_name] = image_caption
         small_name = name_without_ext + "Small" + ext
         is_even = i % 2 == 0
 
@@ -75,6 +100,7 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
         all_photo_html.append(photo_html)
 
     builder = Builder()
+    write_image_captions(input_photo_dir, captions)
 
     photo_idx = -1
     for paragraph in report_paragraph_contents:
