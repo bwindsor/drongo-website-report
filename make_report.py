@@ -83,6 +83,9 @@ def generate_report_text(input_report_file: str, input_photo_dir: str, year: int
     with open(input_report_file, 'r', encoding='utf8') as f:
         report_text = f.read()
 
+    if '\t' in report_text:
+        raise Exception("Tab characters in the report can make weird stuff happen to the uploader. No tab characters allowed!")
+
     report_paragraph_contents: List[str] = [p.strip() for p in report_text.split('\n') if len(p.strip()) > 0]
 
     photo_names = get_large_photo_names(input_photo_dir)
