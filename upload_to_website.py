@@ -13,27 +13,27 @@ import time
 
 def create_dir_if_not_exists(driver: webdriver.Chrome, directory_name_to_create: str):
     try:
-        driver.find_element_by_link_text(directory_name_to_create)
+        driver.find_element(By.LINK_TEXT, directory_name_to_create)
     except NoSuchElementException:
-        create_folder_link = driver.find_element_by_id("MainPlaceHolder_FileBrowserControl_SelectCreateFolderButton")
+        create_folder_link = driver.find_element(By.ID, "MainPlaceHolder_FileBrowserControl_SelectCreateFolderButton")
         create_folder_link.click()
 
         folder_name_input = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "MainPlaceHolder_FileBrowserControl_NewFolder")))
         folder_name_input.send_keys(directory_name_to_create)
 
-        create_button = driver.find_element_by_id("MainPlaceHolder_FileBrowserControl_CreateFolderButton")
+        create_button = driver.find_element(By.ID, "MainPlaceHolder_FileBrowserControl_CreateFolderButton")
         create_button.click()
 
 
 def login(driver: webdriver.Chrome, username: str, password: str):
     driver.get("https://new.drongo.org.uk/Users/Login.aspx")
-    username_input = driver.find_element_by_id("MainPlaceHolder_UsernameText")
+    username_input = driver.find_element(By.ID, "MainPlaceHolder_UsernameText")
     username_input.send_keys(username)
-    password_input = driver.find_element_by_id("MainPlaceHolder_PasswordText")
+    password_input = driver.find_element(By.ID, "MainPlaceHolder_PasswordText")
     password_input.send_keys(password)
 
-    login_button = driver.find_element_by_id("MainPlaceHolder_LogInButton")
+    login_button = driver.find_element(By.ID, "MainPlaceHolder_LogInButton")
     login_button.click()
 
 
@@ -59,11 +59,11 @@ def upload_photos(driver: webdriver.Chrome, year: int, processed_photo_dir: str,
         file_chooser = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'MainPlaceHolder_FileBrowserControl_UploadFile')))
         file_chooser.send_keys(os.path.join(processed_photo_dir, photo_filename))
 
-        overwrite_if_exists_checkbox = driver.find_element_by_id("MainPlaceHolder_FileBrowserControl_OverwriteCheck")
+        overwrite_if_exists_checkbox = driver.find_element(By.ID, "MainPlaceHolder_FileBrowserControl_OverwriteCheck")
         if not overwrite_if_exists_checkbox.is_selected():
             overwrite_if_exists_checkbox.click()
 
-        upload_button = driver.find_element_by_id("MainPlaceHolder_FileBrowserControl_UploadFileButton")
+        upload_button = driver.find_element(By.ID, "MainPlaceHolder_FileBrowserControl_UploadFileButton")
         upload_button.click()
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.LINK_TEXT, photo_filename)))
 
@@ -71,14 +71,14 @@ def upload_photos(driver: webdriver.Chrome, year: int, processed_photo_dir: str,
 def upload_report(driver: webdriver.Chrome, report_title: str, report_content: List[Section]):
     driver.get("https://new.drongo.org.uk/Admin/EditNews.aspx")
 
-    elements = driver.find_elements_by_xpath(f"//*[contains(text(), '{report_title}')]")
+    elements = driver.find_elements(By.XPATH, f"//*[contains(text(), '{report_title}')]")
 
     if len(elements) == 0:
         add_news_item_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "MainPlaceHolder_AddButton")))
         add_news_item_button.click()
     else:
-        parent_element = elements[0].find_element_by_xpath('..')
-        edit_button = parent_element.find_element_by_link_text("Edit")
+        parent_element = elements[0].find_element(By.XPATH, '..')
+        edit_button = parent_element.find_element(By.LINK_TEXT, "Edit")
         edit_button.click()
 
     title_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "MainPlaceHolder_TitleText")))
@@ -89,7 +89,7 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
     while True:
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "MainPlaceHolder_SectionsView_DeleteSectionButton_0")))
         try:
-            delete_section_button = driver.find_element_by_id("MainPlaceHolder_SectionsView_DeleteSectionButton_1")
+            delete_section_button = driver.find_element(By.ID, "MainPlaceHolder_SectionsView_DeleteSectionButton_1")
             delete_section_button.click()
             obj = driver.switch_to.alert
             obj.accept()
@@ -101,7 +101,7 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
     for i, section in enumerate(report_content):
         print(f"Section {i}")
         if i > 0:
-            add_section_button = driver.find_element_by_id("MainPlaceHolder_AddSectionButton")
+            add_section_button = driver.find_element(By.ID, "MainPlaceHolder_AddSectionButton")
             add_section_button.click()
 
         section_title_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, f"MainPlaceHolder_SectionsView_SubtitleText_{i}")))
@@ -111,11 +111,11 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
         else:
             section_title_input.clear()
 
-        content_input = driver.find_element_by_id(f"MainPlaceHolder_SectionsView_ContentText_{i}")
+        content_input = driver.find_element(By.ID, f"MainPlaceHolder_SectionsView_ContentText_{i}")
         content_input.clear()
         content_input.send_keys(section.content)
 
-    save_button = driver.find_element_by_id("MainPlaceHolder_SaveButton")
+    save_button = driver.find_element(By.ID, "MainPlaceHolder_SaveButton")
     save_button.click()
 
 
