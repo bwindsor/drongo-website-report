@@ -7,7 +7,7 @@ def get_photo_names(photo_dir: str) -> list[str]:
 
 
 def get_large_photo_names(photo_dir: str) -> list[str]:
-    return [f for f in get_photo_names(photo_dir) if "Small" not in f]
+    return sorted(f for f in get_photo_names(photo_dir) if "Small" not in f)
 
 
 def process_photos(photo_dir: str, output_dir: str):
