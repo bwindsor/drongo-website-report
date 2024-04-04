@@ -1,6 +1,6 @@
 ## Project setup
 1. Clone the git repository
-1. Download the `chromedriver` executable suitable for your version of Chrome from [https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads)
+1. Download the `chromedriver` executable suitable for your version of Chrome from [https://googlechromelabs.github.io/chrome-for-testing/](https://googlechromelabs.github.io/chrome-for-testing/)
 1. Put the `chromedriver` executable in this directory
 1. Create a Python virtual environment `virtualenv env`
 1. Activate the virtual environment 
