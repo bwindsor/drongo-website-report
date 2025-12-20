@@ -1,4 +1,6 @@
 import os
+import re
+import requests
 import platform
 from typing import List
 from drongo_types import Section
@@ -122,7 +124,22 @@ def upload_report(driver: webdriver.Chrome, report_title: str, report_content: L
 def upload_to_website(year: int, processed_photo_dir: str, photo_upload_dir_name: str,
                       username: str, password: str, report_title: str, report_content: List[Section]):
     chromedriver_name = "./chromedriver.exe" if platform.system() == "Windows" else "./chromedriver"
-    with closing(webdriver.Chrome(service=webdriver.ChromeService(executable_path=chromedriver_name))) as driver:
+    try:
+        d = webdriver.Chrome(service=webdriver.ChromeService(executable_path=chromedriver_name))
+    except Exception as e:
+        matches = re.search(r"Current browser version is (\d+\.\d+\.\d+)\.\d+ with binary path", str(e))
+        if matches is None:
+            raise
+        installed_chrome_version = matches.group(1)
+        response = requests.get("https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json")
+        j = response.json()
+        download = sorted(filter(lambda x: x['version'].startswith(installed_chrome_version), j["versions"]), key=lambda x: x['revision'])[-1]
+        print(installed_chrome_version)
+        relevant_downloads = download['downloads']['chromedriver']
+        raise Exception(f"{str(e)}\n\nDownloads for your system:\n" + "\n".join([f"{r['platform']}: {r['url']}" for r in relevant_downloads]))
+
+
+    with closing(d) as driver:
         login(driver, username, password)
 
         upload_photos(driver, year, processed_photo_dir, photo_upload_dir_name)
